@@ -1,0 +1,24 @@
+declare
+v_id number;
+v_fi_id number;
+V_FULL_NAME varchar2(500);
+V_NATIONAL_CODE varchar2(100);
+V_MOBILE_NUMBER varchar2(100);
+cursor c_link is select FRAUD_ITEM_ID
+from fcr_fraud_item t 
+where t.fraud_reason_id = 14
+and to_char(t.study_period_start_date,'yyyy/mm/dd','nls_calendar=persian') = '1402/06/01';
+begin
+  SELECT MAX(ID) + 1 into v_id FROM   fraud.frd_task_link;
+  open c_link;
+  loop
+    fetch c_link into v_fi_id;
+    exit when c_link%notfound;
+    select FULL_NAME,NATIONAL_CODE,MOBILE_NUMBER into V_FULL_NAME,V_NATIONAL_CODE,V_MOBILE_NUMBER 
+    from DW_DM_HCP_PERSON where id = (select HCP_PERSON_ID from fcr_fraud_item where FRAUD_ITEM_ID = v_fi_id);
+    insert into fraud.frd_task_link(id,fraud_item_id,link_type_id,link,RECIVER_NAME,RECIVER_NATIONAL_CODE,RECIVER_NUMBER)
+    values(v_id,v_fi_id,1,'https://"URL"LINKID='||v_id,V_FULL_NAME,V_NATIONAL_CODE,V_MOBILE_NUMBER);
+    v_id := v_id + 1;
+  end loop;
+  close c_link;
+end;
