@@ -1,0 +1,9 @@
+select * from frd_task_link where FRAUD_ITEM_ID in (select FRAUD_ITEM_ID
+
+from fcr_fraud_item t 
+
+where t.fraud_reason_id = 14
+
+and to_char(t.study_period_start_date,'yyyy/mm/dd','nls_calendar=persian') = '1402/06/01')
+
+and LINK_TYPE_ID != 5)
