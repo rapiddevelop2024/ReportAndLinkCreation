@@ -15,7 +15,7 @@ exc.attending_doctor_id , province.id as province_id , s.id as speciality_id
 from schema.case_table c    --table with all cases data , prices of cases and province_id
 join schema.hospitals_data hcp on c.hcp_company_id = hcp.id   --table with hospitals information
 join schema.hospitals_national_data lp on lp.id = hcp.id        --table with national code of hospitals and names
-join cor.legal_type lt on lt.id = lp.legal_type_id     
+join cor.hospitals_type lt on lt.id = lp.legal_type_id     --table with type of hospitals 
 join hld.extended_claim exc on exc.id = c.id
 left join tpa.hcp_person hp on hp.id = exc.attending_doctor_id
 left join cor.natural_person np on np.id = hp.person_id
