@@ -1,0 +1,103 @@
+create table table_name as select * from (select hp.full_name as dr_name ,
+hp.medical_number , np.national_code, hcp.id as hcp_id ,lt.name as legal_name ,s.name as speciality_name,
+hcp.name as hcp_name , uni.name as university_name , province.name as province_name ,
+city.name as city_name , hote.cnt as all_hoteling , hoteling.mablagh as hoteling_price ,
+jarahi.mablagh as jarahi_price , moshavere.mablagh as moshavere_price ,visit.mablagh as visit_price ,
+azmayeshgah.mablagh as azmayeshgah_price , asib_shenasi.mablagh as asib_shenasi_price ,
+radio_geraphi.mablagh as radio_graphi_price ,sono_geraphi.mablagh as sono_graphi_price ,
+ct_scan.mablagh as ct_scan_price , mri.mablagh as MRI_price , navar_negari.mablagh as navar_negari_price,
+dializ.mablagh as dializ_price , khadamate_parastari.mablagh as khadamate_parastari_price ,
+moraghebat_parastari.mablagh as moraghebat_parastari_price , daro_bakhsh.mablagh as daro_bakhsh_price ,
+daroo_otaghamal.mablagh as daro_otaghamal_price , lavazem_bakhsh.mablagh as lavazem_bakhsh_price ,
+lavazem_otaghamal.mablagh as lavazem_otaghamal_price , khadamat_mokamel.mablagh as khadamate_mokamel_price ,
+ct.id as claim_type_id,ct.name as claim_type_name,c.id as claim_id,c.first_cover_amount as claim_first_cover_amount
+exc.attending_doctor_id , province.id as province_id , s.id as speciality_id
+from schema.case_table c    --table with all cases data , prices of cases and province_id
+join schema.hospitals_data hcp on c.hcp_company_id = hcp.id   --table with hospitals information
+join schema.hospitals_national_data lp on lp.id = hcp.id        --table with national code of hospitals and names
+join cor.legal_type lt on lt.id = lp.legal_type_id     
+join hld.extended_claim exc on exc.id = c.id
+left join tpa.hcp_person hp on hp.id = exc.attending_doctor_id
+left join cor.natural_person np on np.id = hp.person_id
+left join tpa.hcp_person_speciality hps on hps.hcp_person_id = hp.id and hps.disable_date is null
+left join tpa.speciality_hierarchy sh on sh.id = hps.speciality_hierarchy_id and sh.disable_date is null
+left join tpa.speciality s on s.id = sh.specialty_id and s.disable_date is null
+join cor.person p on p.id = hcp.id
+join cor.person_unit pu on pu.person_id = p.id and pu.unit_type_id = 99
+join cor.zone province on province.id = pu.province_id
+join cor.zone city on city.id = pu.city_id
+join hld.claim_type ct on ct.id = c.claim_type_id
+join tpa.university uni on uni.id = hcp.university_id
+
+outer apply (select sum(sii.quantity) as cnt from hld.claim_service_item sii
+join hld.claim_service_group sg on sii.claim_service_group_id = sg.id
+where sg.service_group_id = 126 and sg.claim_id = c.id) hote
+
+outer apply (select sum(csg1.first_cover_amount) as mablagh
+from hld.claim c1
+join hld.claim_service_group csg1 on csg1.claim_id = c1.id
+where csg1.service_group_id in (126)
+and c1.year = 1402
+and c1.bill_type_id != 1 and c1.claim_type_id in (2,5) and c1.bill_id is not null
+and c1.status_id !=65 and c.id = c1.id)hoteling
+
+outer apply (select sum(csg1.first_cover_amount) as mablagh
+from hld.claim c1
+join hld.claim_service_group csg1 on csg1.claim_id = c1.id
+where csg1.service_group_id in (126)
+and c1.year = 1402
+and c1.bill_type_id != 1 and c1.claim_type_id in (2,5) and c1.bill_id is not null
+and c1.status_id !=65 and c.id = c1.id)hoteling
+
+outer apply (select sum(csg2.first_cover_amount) as mablagh
+from hld.claim c2
+join hld.claim_service_group csg2 on csg2.claim_id = c2.id
+where csg2.service_group_id in (160)
+and c2.year = 1402
+and c2.bill_type_id != 1 and c2.claim_type_id in (2,5) and c2.bill_id is not null
+and c2.status_id !=65 and c.id = c2.id)jarahi
+
+outer apply (select sum(csg3.first_cover_amount) as mablagh
+from hld.claim c3
+join hld.claim_service_group csg3 on csg3.claim_id = c3.id
+where csg3.service_group_id in (98)
+and c3.year = 1402
+and c3.bill_type_id != 1 and c3.claim_type_id in (2,5) and c3.bill_id is not null
+and c3.status_id !=65 and c.id = c3.id)moshavere
+
+outer apply (select sum(csg4.first_cover_amount) as mablagh
+from hld.claim c4
+join hld.claim_service_group csg4 on csg4.claim_id = c4.id
+where csg4.service_group_id in (119)
+and c4.year = 1402
+and c4.bill_type_id != 1 and c16.claim_type_id in (2,5) and c16.bill_id is not null
+and c16.status_id !=65 and c.id = c16.id)daroo_otaghamal
+
+outer apply (select sum(csg17.first_cover_amount) as mablagh
+from hld.claim c17
+join hld.claim_service_group csg17 on csg17.claim_id = c17.id
+where csg17.service_group_id in (105)
+and c17.year = 1402
+and c17.bill_type_id != 1 and c17.claim_type_id in (2,5) and c17.bill_id is not null
+and c17.status_id !=65 and c.id = c17.id)lavazem_bakhsh
+
+outer apply (select sum(csg18.first_cover_amount) as mablagh
+from hld.claim c18
+join hld.claim_service_group csg18 on csg18.claim_id = c18.id
+where csg18.service_group_id in (104)
+and c18.year = 1402
+and c18.bill_type_id != 1 and c18.claim_type_id in (2,5) and c18.bill_id is not null
+and c18.status_id !=65 and c.id = c18.id)lavazem_otaghamal
+
+outer apply (select sum(csg19.first_cover_amount) as mablagh
+from hld.claim c19
+join hld.claim_service_group csg19 on csg19.claim_id = c19.id
+where csg19.service_group_id in (137)
+and c19.year = 1402
+and c19.bill_type_id != 1 and c19.claim_type_id in (2,5) and c19.bill_id is not null
+and c19.status_id !=65 and c.id = c19.id)khadamat_mokamel
+
+where c.year = 1402 and c.status_id != 65 and c.bill_id is not null
+and province.id = 713 and c.claim_type_id in(5,3,2,7) and c.bill_type_id != 1
+and Trunc(c.release_date) >= to_date('1402/06/01','yyyy/mm/dd','nls_calendar=persian')
+and Trunc(c.release_date) <= to_date('1402/06/31','yyyy/mm/dd','nls_calendar=persian'))nologging
